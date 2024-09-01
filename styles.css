@@ -1,0 +1,286 @@
+:root {
+    --bg-color: black;
+    --white-shade: rgba(160, 160, 160, 70%);
+    --darker-shade: rgba(90, 90, 90, 60%);
+    --semi-transparent: rgba(40, 40, 40, 60%);
+    --gap: 8px;
+    --space-header-top-horizontal-div: 0.5%;
+    --padding-header-el: 5vw;
+}
+
+*, ::before, ::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+}
+
+html, body {
+    height: 100%;
+    min-width: 375px;
+}
+
+#add-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 5px;
+}
+
+#add-container, 
+#tooltip {
+    padding: 5px;
+}
+
+#add-container:hover > #tooltip {
+    visibility: visible;
+}
+
+#add-icon {
+    color: var(--white-shade);
+    font-size: min(2em, 10vw);
+    transition: 300ms linear;
+    cursor: pointer;
+}
+
+#add-icon:hover {
+    filter: invert();
+}
+
+#tooltip {
+    background-color: var(--white-shade);
+    visibility: hidden;
+    border-radius: 5px;
+    text-align: left;
+    font-size: 1rem;
+}
+
+/* ***********************************************ARTICLES STUFF********************************************************** */
+/* Sometimes, the description is too big to fit within the 120px in height. so the text gets chopped off */
+
+.article {
+    display: flex;
+    color: white;
+    min-height: 70px;
+    max-height: 120px;
+}
+
+.left-col {
+    flex: .3;
+    max-width: 300px;
+    min-width: 160px
+}
+
+.right-col {
+    flex: 1;
+}
+
+.cell {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: var(--gap);
+}
+
+.icon {
+    color: var(--white-shade);;
+    font-size: min(2.9em, 10vw);
+}
+
+.image {
+    height: 45px;
+    border-radius: 5px;
+}
+
+.text-container > *:not(h2) {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.text-container > h2 {
+    overflow: hidden;
+}
+
+.alternate-color {
+    background-color: var(--semi-transparent);
+}
+
+/* *********************************************************************************************************************** */
+
+.horizontal-divider {
+    border-bottom: 2px solid var(--white-shade);
+}
+
+h1, h2, h3, h4, p, span, strong, span, th, td, input, button {
+    font-family: "Montserrat", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 550;
+}
+
+h1 {
+    margin-bottom: 1%;
+    font-size: 0.85rem;
+}
+
+h2 {
+    font-size: 0.75rem;
+}
+
+p.date {
+    font-size: 0.65rem;
+    color: var(--white-shade);
+}
+
+p.description {
+    font-size: 0.85rem;
+}
+
+.hidden {
+    display: none;
+}
+
+/* **********************************************MODAL STUFF***************************************************** */
+.toggle-modal {
+    display: none;
+}
+
+.modal {
+    position: fixed; 
+    z-index: 999; 
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5); 
+}
+
+.modal-content {
+    background-color: var(--semi-transparent);
+    margin: 15% auto; 
+    padding: 15px;
+    border-radius: 5px;
+    width: 50%;
+    min-width: 350px;
+    max-width: 600px;
+    min-height: 300px;
+    max-height: 400px;
+    overflow: scroll;
+
+    text-align: center;
+    color: var(--white-shade);
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 0;  
+    background: transparent;  
+}
+
+#input-text-container {
+    display: flex;
+    margin-bottom: 5%;
+}
+
+#input-text-container > * {
+    padding: 10px;
+}
+
+#input-text {
+    flex: 1;
+    background-color: var(--darker-shade);
+    border: none;
+    outline: none;          
+    box-shadow: none;        
+    color: darkgrey;
+}
+
+#input-text, 
+#save-text,
+th {
+    font-size: .8rem;
+}
+
+.hidden {
+    display: none;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; 
+    font-size: .8rem;
+}
+
+th, td {
+    padding: 5px;
+    text-align: left;
+
+    overflow: hidden;
+    word-wrap: break-word; 
+    text-overflow: ellipsis;
+}
+
+#urls-table th:first-child, 
+#urls-table td:first-child {
+    width: 80%;
+}
+
+#urls-table th:last-child, 
+#urls-table td:last-child {
+    text-align: center;
+    width: 20%;
+}
+
+button {
+    padding: 5px 10px;
+    background-color: var(--darker-shade);
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #d32f2f;
+}
+
+/* ************************************************* MEDIA QUERIES ************************************************ */
+
+@media (max-width: 980px) {
+    .text-container > * {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .icon {
+        display: none;
+    }
+
+    th, td {
+        padding: 2px 5px;
+    }
+
+    h1, h2, h3, h4, p, span, strong, span, th, td, input, button {
+        font-family: "Montserrat", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 450;
+    }
+    
+    h1 {
+        margin-bottom: 1%;
+        font-size: 0.8rem;
+    }
+    
+    h2 {
+        font-size: 0.6rem;
+    }
+    
+    p.date {
+        font-size: 0.5rem;
+        color: var(--white-shade);
+    }
+    
+    p.description {
+        font-size: 0.6rem;
+    }
+}

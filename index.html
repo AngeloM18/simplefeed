@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>RSS Feed Reader</title>
+        <link rel="stylesheet" href="./styles.css">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    </head>
+
+    <body>
+        <div id="modal" class="modal toggle-modal">
+            <div class="modal-content">
+                <div id="input-text-container">
+                    <input type="text" id="input-text" placeholder="RSS FEED URL">
+                    <button id="save-text">Save</button>
+                </div>
+                <table id="urls-table">
+                    <thead>
+                      <tr>
+                        <th>Feed</th>
+                        <th>Delete</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <header>
+            <div id="add-container">
+                <span class="fa fa-plus-square" id="add-icon"aria-hidden="true"></span>
+                <span id="tooltip">Add a new feed</span>
+            </div>
+        </header>
+
+        <div class="horizontal-divider"></div>
+
+        <main>
+            <table>
+            </table>
+        </main>
+        <script src="script.js"></script>
+    </body>
+
+</html>

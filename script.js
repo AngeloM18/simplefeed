@@ -18,21 +18,6 @@ function normalize(description) {
 }
 
 // DUMB helper classes
-class Feed {
-    constructor(url, etag,  lastModified, articles) {
-        this.url = url;
-        this.etag = etag;
-        this.lastModified = lastModified;
-
-        // Enforcing typing out of boredom.
-        if (Array.isArray(articles) && articles.every(item => item instanceof Article)) {
-            this.articles = articles
-        } else {
-            throw new Error("Argument 'articles' must be an array of Article objects")
-        };
-    };
-}
-
 class Article {
     constructor(feed, title, date, url, description, image_url) {
         this.feed = feed;
@@ -50,7 +35,7 @@ class feedFetcher {
     }
 
     async fetchRSSFeed(url) {
-        url = this.CORSProxy + url;
+        url = this.CORSProxy + encodeURIComponent(url);
         try {
             const response = await fetch(url);
             const xmlDocument = new DOMParser().parseFromString(await response.text(), "application/xml");
@@ -61,21 +46,29 @@ class feedFetcher {
             return items.map(item => {
                 let title = item.getElementsByTagName("title")[0].textContent;
                 let feed = capitalizeString(feedDomain.match(/^[\w]+/)[0]);
-                let date = item.getElementsByTagName("pubDate")[0].textContent;
+                let date = item.getElementsByTagName("pubDate")[0]?.textContent;
                 let url = item.getElementsByTagName("link")[0].textContent;
-                let description = normalize(item.getElementsByTagName("description")[0].textContent);
+                let description = normalize(item.getElementsByTagName("description")[0]?.textContent);
                 let image_url = Array.from(item.getElementsByTagName("*")).find(element => element.hasAttribute("url"))?.getAttribute("url");
 
+                if (!feed || !date || !description || description.includes("undefined")) {
+                    return null
+                };
+
+                if (!image_url) {
+                    image_url = "./static/default-image.png "
+                };
+
                 return new Article(feed, title, date, url, description, image_url);
-            });
+            }).filter(article => article !== null);
         } catch (error) {
             console.error("Error fetching RSS feed:", error);
             return [];
         }
-    }
+    };
 
     async validateFeed(url) {
-        url = this.CORSProxy + url;
+        url = this.CORSProxy + encodeURIComponent(url);
         try {
             const response = await fetch(url);
             if (!response.ok || !response.headers.get('Content-Type')?.includes('xml')) {
@@ -86,8 +79,9 @@ class feedFetcher {
             console.error(`Error validating RSS URL: ${url}`, error);
             return false;
         }
-    }
-}
+    };
+
+};
 
 // DOM Manipulation
 const newsFeed = document.getElementById("feed");
@@ -98,11 +92,12 @@ const closeModalButton = document.getElementById("closeModal");
 const saveTextButton = document.getElementById("save-text");
 const inputText = document.getElementById("input-text");
 const tableBody = document.querySelector("#urls-table tbody");
-const feedTable = document.querySelector("main > table")
+const feedTable = document.querySelector("main > table");
+const pollingInterval = document.querySelector("#polling-interval");
 
-let feedURLs = [];
-let cachedArticles = [];
 const feed = new feedFetcher();
+let feedURLs;
+let intervalID;
 
 async function validateRSSURL(url) {
     const domainPattern = /^(https?:\/\/)?([\w-]+\.)+[\w-]+(\/[\w- ./?%&=]*)?$/;
@@ -110,10 +105,10 @@ async function validateRSSURL(url) {
         return await feed.validateFeed(url);
     }
     return false;
-}
+};
 
-function renderArticles() {
-    loadURLs();
+function renderArticles() { 
+    feedTable.innerHTML = "";
     const fetchAllArticles = feedURLs.map(url => feed.fetchRSSFeed(url));
     Promise.all(fetchAllArticles)
         .then(arrays => {
@@ -131,7 +126,7 @@ function renderArticles() {
                 });
         })
         .catch(error => console.error("Error fetching and rendering feeds:", error));
-}
+};
 
 function createArticle(feedName, title, date, url, description, image_url, index) {
     return `
@@ -156,30 +151,31 @@ function createArticle(feedName, title, date, url, description, image_url, index
 }
 
 function populateTable() {
-    loadURLs(); 
     tableBody.innerHTML = feedURLs.map((url, index) => `
         <tr>
             <td>${url}</td>
             <td><button onclick="deleteURL(${index})">&times</button></td>
         </tr>
     `).join('');
-    renderArticles();
-}
+};
 
 function deleteURL(index) {
     feedURLs.splice(index, 1);
     saveURLs(); 
-    populateTable();
-}
+};
 
-function saveURLs() {
+function saveURLs(url = null) {
+    if (url) {
+        feedURLs.push(url);
+    };
     localStorage.setItem("feedURLs", JSON.stringify(feedURLs));
-}
+    populateTable();
+};
 
 function loadURLs() {
-    const stored = localStorage.getItem("feedURLs")
-    feedURLs = stored ? JSON.parse(stored) : []
-}
+    const stored = localStorage.getItem("feedURLs");
+    feedURLs = stored ? JSON.parse(stored) : [];
+};
 
 // Event Listeners
 saveTextButton.addEventListener("click", async () => {
@@ -188,9 +184,7 @@ saveTextButton.addEventListener("click", async () => {
         try {
             const isValid = await validateRSSURL(text);
             if (isValid) {
-                feedURLs.push(text);
-                saveURLs();
-                populateTable();
+                saveURLs(text);
                 inputText.value = "";
             } else {
                 alert("Please, enter a valid RSS feed URL!");
@@ -206,7 +200,6 @@ saveTextButton.addEventListener("click", async () => {
 
 addButton.addEventListener("click", () => {
     modal.classList.toggle("toggle-modal");
-    populateTable();
 });
 
 window.addEventListener("click", (event) => {
@@ -215,5 +208,29 @@ window.addEventListener("click", (event) => {
     }
 });
 
+pollingInterval.addEventListener('change', function() {
+    const interval = parseInt(this.value, 10);
+    // console.log(`Polling interval set to: ${interval / 60000} minutes`);
+
+    clearInterval(intervalID);
+    intervalID = setInterval(renderArticles, interval);
+    localStorage.setItem("interval", JSON.stringify(interval));
+
+});
+
+const callback = function(mutationsList, observer) {
+    for (let mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+            renderArticles();
+        };
+    };
+};
+
+const observer = new MutationObserver(callback);
+observer.observe(tableBody, { childList: true, subtree: true });
+
+
 // Initial Render
-//renderArticles();
+intervalID = setInterval(renderArticles, (localStorage.getItem("interval") || 300000));
+loadURLs();
+populateTable();

@@ -27,8 +27,8 @@
                       </tr>
                     </thead>
 
-                    <tbody>
-                    </tbody>
+                        <tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -37,6 +37,16 @@
             <div id="add-container">
                 <span class="fa fa-plus-square" id="add-icon"aria-hidden="true"></span>
                 <span id="tooltip">Add a new feed</span>
+            </div>
+            <div id="interval-container">
+                <span id="tooltip">Set polling interval</span>
+                <select id="polling-interval">
+                    <option value="300000">5 minutes</option>
+                    <option value="600000">10 minutes</option>
+                    <option value="1800000">30 minutes</option>
+                    <option value="3600000">60 minutes</option>
+                    <option value="7200000">240 minutes</option>
+                </select>
             </div>
         </header>
 

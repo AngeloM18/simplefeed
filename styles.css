@@ -2,7 +2,7 @@
     --bg-color: black;
     --white-shade: rgba(160, 160, 160, 70%);
     --darker-shade: rgba(90, 90, 90, 60%);
-    --semi-transparent: rgba(40, 40, 40, 60%);
+    --semi-transparent: rgba(40, 40, 40, 70%);
     --gap: 8px;
     --space-header-top-horizontal-div: 0.5%;
     --padding-header-el: 5vw;
@@ -23,7 +23,13 @@ html, body {
     min-width: 375px;
 }
 
-#add-container {
+header {
+    display: flex;
+    justify-content: space-between;
+}
+
+#add-container,
+#interval-container {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -32,12 +38,27 @@ html, body {
 }
 
 #add-container, 
-#tooltip {
+#tooltip,
+#interval-container,
+#polling-interval {
     padding: 5px;
 }
 
-#add-container:hover > #tooltip {
+#add-container:hover > #tooltip,
+#interval-container:hover > #tooltip {
     visibility: visible;
+}
+
+#polling-interval {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    background-color: var(--white-shade);
+}
+
+#polling-interval:focus {
+    outline: none;
 }
 
 #add-icon {
@@ -116,7 +137,7 @@ html, body {
     border-bottom: 2px solid var(--white-shade);
 }
 
-h1, h2, h3, h4, p, span, strong, span, th, td, input, button {
+h1, h2, h3, h4, p, span, strong, span, th, td, input, button, select, option {
     font-family: "Montserrat", sans-serif;
     font-optical-sizing: auto;
     font-weight: 550;
@@ -260,7 +281,7 @@ button:hover {
         padding: 2px 5px;
     }
 
-    h1, h2, h3, h4, p, span, strong, span, th, td, input, button {
+    h1, h2, h3, h4, p, span, strong, span, th, td, input, button, select, option {
         font-family: "Montserrat", sans-serif;
         font-optical-sizing: auto;
         font-weight: 450;

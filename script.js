@@ -3,6 +3,16 @@ function capitalizeString(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function truncateDescription(str) {
+    if (str.length > 180) {
+        const whitespaceIndex = str.indexOf(" ", 180);
+        if (whitespaceIndex !== -1) {
+            return str.slice(0, whitespaceIndex)
+        };
+    };
+    return str
+};
+
 function normalize(description) {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = description;
@@ -32,7 +42,7 @@ class Article {
 class feedFetcher {
     constructor() {
         this.CORSProxy = "https://corsproxy.io/?";
-    }
+    };
 
     async fetchRSSFeed(url) {
         url = this.CORSProxy + encodeURIComponent(url);
@@ -48,10 +58,10 @@ class feedFetcher {
                 let feed = capitalizeString(feedDomain.match(/^[\w]+/)[0]);
                 let date = item.getElementsByTagName("pubDate")[0]?.textContent;
                 let url = item.getElementsByTagName("link")[0].textContent;
-                let description = normalize(item.getElementsByTagName("description")[0]?.textContent);
+                let description = truncateDescription(normalize(item.getElementsByTagName("description")[0]?.textContent)); 
                 let image_url = Array.from(item.getElementsByTagName("*")).find(element => element.hasAttribute("url"))?.getAttribute("url");
 
-                if (!feed || !date || !description || description.includes("undefined")) {
+                if (!feed || !date || !description || description.includes("undefined") || description.includes("null")) {
                     return null
                 };
 
@@ -107,25 +117,26 @@ async function validateRSSURL(url) {
     return false;
 };
 
-function renderArticles() { 
-    feedTable.innerHTML = "";
+async function renderArticles() { 
     const fetchAllArticles = feedURLs.map(url => feed.fetchRSSFeed(url));
-    Promise.all(fetchAllArticles)
-        .then(arrays => {
-            arrays.flat().sort((a, b) => new Date(b.date) - new Date(a.date))
-                .forEach((article, index) => {
-                    feedTable.innerHTML += createArticle(
-                        article.feed,
-                        article.title,
-                        article.date,
-                        article.url,
-                        article.description,
-                        article.image_url,
-                        index       
-                    );
-                });
-        })
-        .catch(error => console.error("Error fetching and rendering feeds:", error));
+    const arrays = await Promise.all(fetchAllArticles);
+
+    const articles = arrays
+        .flat()
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map((article, index) => {
+            return createArticle(
+                article.feed,
+                article.title,
+                article.date,
+                article.url,
+                article.description,
+                article.image_url,
+                index       
+            );
+        }).join("");
+    
+    feedTable.innerHTML = articles
 };
 
 function createArticle(feedName, title, date, url, description, image_url, index) {
@@ -210,7 +221,6 @@ window.addEventListener("click", (event) => {
 
 pollingInterval.addEventListener('change', function() {
     const interval = parseInt(this.value, 10);
-    // console.log(`Polling interval set to: ${interval / 60000} minutes`);
 
     clearInterval(intervalID);
     intervalID = setInterval(renderArticles, interval);
@@ -228,7 +238,6 @@ const callback = function(mutationsList, observer) {
 
 const observer = new MutationObserver(callback);
 observer.observe(tableBody, { childList: true, subtree: true });
-
 
 // Initial Render
 intervalID = setInterval(renderArticles, (localStorage.getItem("interval") || 300000));

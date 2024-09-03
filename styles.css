@@ -82,6 +82,7 @@ header {
 
 /* ***********************************************ARTICLES STUFF********************************************************** */
 /* Sometimes, the description is too big to fit within the 120px in height. so the text gets chopped off */
+/* I could trim each description down to 80 or so characters max. */
 
 .article {
     display: flex;

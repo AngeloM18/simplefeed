@@ -6,6 +6,7 @@
     --gap: 8px;
     --space-header-top-horizontal-div: 0.5%;
     --padding-header-el: 5vw;
+    --light-red: #d32f2f;
 }
 
 *, ::before, ::after {
@@ -159,11 +160,25 @@ p.date {
 }
 
 p.description {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 .hidden {
     display: none;
+}
+
+.title, a {
+    color: var(--light-red);
+    font-weight: 650;
+}
+
+a:visited {
+    color: var(--white-shade)
+}
+
+a:hover {
+    background-color: var(--semi-transparent);
+    border-radius: 5px;
 }
 
 /* **********************************************MODAL STUFF***************************************************** */
@@ -263,7 +278,7 @@ button {
 }
 
 button:hover {
-    background-color: #d32f2f;
+    background-color: var(--light-red);
 }
 
 /* ************************************************* MEDIA QUERIES ************************************************ */

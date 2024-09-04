@@ -1,21 +1,37 @@
 // Utility Functions
-function capitalizeString(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-function truncateDescription(str) {
-    if (str.length > 180) {
-        const whitespaceIndex = str.indexOf(" ", 180);
-        if (whitespaceIndex !== -1) {
-            return str.slice(0, whitespaceIndex)
+function normalizeName(string) {
+    function truncateSpecialCharacters(string) {
+        const specialCharIndex = string.search(/[^a-zA-Z0-9\s]/);
+        if (specialCharIndex !== -1) {
+           return string.substring(0, specialCharIndex);
         };
+        return string
     };
-    return str
+
+    function splitSecondWhiteSpace(string) {
+        const secondWhiteSpace = string.match(/(?:\S*\s){2}/)
+        if (secondWhiteSpace) {
+            return string.substring(0, secondWhiteSpace[0].length - 1);
+        };
+        return string
+    };
+
+    return truncateSpecialCharacters(splitSecondWhiteSpace(string));
 };
 
-function normalize(description) {
+function truncateText(string, len) {
+    if (string.length > len) {
+        const whitespaceIndex = string.indexOf(" ", len);
+        if (whitespaceIndex !== -1) {
+            return string.slice(0, whitespaceIndex);
+        };
+    };
+    return string
+};
+
+function normalizeDescription(string) {
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = description;
+    tempDiv.innerHTML = string;
     return tempDiv.textContent
         .trim()
         .replace(/&/g, "&amp;")
@@ -42,7 +58,7 @@ class Article {
 class feedFetcher {
     constructor() {
         this.CORSProxy = "https://corsproxy.io/?";
-    };
+    };  
 
     async fetchRSSFeed(url) {
         url = this.CORSProxy + encodeURIComponent(url);
@@ -50,15 +66,15 @@ class feedFetcher {
             const response = await fetch(url);
             const xmlDocument = new DOMParser().parseFromString(await response.text(), "application/xml");
             const items = Array.from(xmlDocument.getElementsByTagName("item"));
-            const feedDomain = xmlDocument.getElementsByTagName("title")[0].textContent;
+            const feedDomain = normalizeName(xmlDocument.getElementsByTagName("title")[0].textContent);
 
             // Array of Article objects.
             return items.map(item => {
-                let title = item.getElementsByTagName("title")[0].textContent;
-                let feed = capitalizeString(feedDomain.match(/^[\w]+/)[0]);
+                let title = truncateText(item.getElementsByTagName("title")[0].textContent, 140);
+                let feed = feedDomain;  
                 let date = item.getElementsByTagName("pubDate")[0]?.textContent;
                 let url = item.getElementsByTagName("link")[0].textContent;
-                let description = truncateDescription(normalize(item.getElementsByTagName("description")[0]?.textContent)); 
+                let description = truncateText(normalizeDescription(item.getElementsByTagName("description")[0]?.textContent), 180); 
                 let image_url = Array.from(item.getElementsByTagName("*")).find(element => element.hasAttribute("url"))?.getAttribute("url");
 
                 if (!feed || !date || !description || description.includes("undefined") || description.includes("null")) {
@@ -106,7 +122,7 @@ const feedTable = document.querySelector("main > table");
 const pollingInterval = document.querySelector("#polling-interval");
 
 const feed = new feedFetcher();
-let feedURLs;
+let feedURLs = [];
 let intervalID;
 
 async function validateRSSURL(url) {
@@ -147,7 +163,7 @@ function createArticle(feedName, title, date, url, description, image_url, index
                     <i class="fa fa-newspaper" aria-hidden="true"></i>
                 </div>
                 <div class="text-container">
-                    <h1>${feedName}</h1>
+                    <h1 class="title">${feedName}</h1>
                     <h2>${title}</h2>
                     <p class="date">${date}</p>
                 </div>
@@ -155,7 +171,7 @@ function createArticle(feedName, title, date, url, description, image_url, index
 
             <td class="cell right-col">
                 <img class="image" src="${image_url}" alt="Article Image">
-                <p class="description">${description}... <a class="hyperlink" href="${url}" target="_blank">Read more</a></p>
+                <p class="description">${description}...            <a class="hyperlink" href="${url}" target="_blank"> Read more</a></p>
             </td>
         </tr>
     `;
@@ -240,6 +256,11 @@ const observer = new MutationObserver(callback);
 observer.observe(tableBody, { childList: true, subtree: true });
 
 // Initial Render
+if (!localStorage.getItem("firstRun")) {
+    localStorage.setItem("firstRun", "dummy");
+    saveURLs("https://www.newscientist.com/feed/home/");
+};
+
 intervalID = setInterval(renderArticles, (localStorage.getItem("interval") || 300000));
 loadURLs();
 populateTable();

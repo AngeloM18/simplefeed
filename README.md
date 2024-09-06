@@ -5,7 +5,8 @@ This was done using plain HTML, CSS, and JavaScript, without relying on any fanc
 * The code runs directly in your browser, and the feeds you save are stored in the domain's localStorage object (site data) in your browser.
 * You can modify the polling rate at which your stored feeds are fetched, ranging from 5 minutes to 4 hours. Since this uses a CORS proxy to fetch data from RSS feeds, I have limited the minimum polling rate to 5 minutes.
 
-[simplefeed-demo.webm](https://github.com/user-attachments/assets/b8d5d656-8214-433c-947a-d50609a9fe06)
+![simplefeed-demo](https://github.com/user-attachments/assets/1704ae93-bf82-4e9a-adc8-124efccd53d9)
+
 
 ## TO DO:
 * ##### Implement notifications.

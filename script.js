@@ -57,7 +57,7 @@ class Article {
 
 class feedFetcher {
     constructor() {
-        this.CORSProxy = "https://corsproxy.io/?";
+        this.CORSProxy = "https://corsproxy.io/?url=";
     };  
 
     async fetchRSSFeed(url) {
